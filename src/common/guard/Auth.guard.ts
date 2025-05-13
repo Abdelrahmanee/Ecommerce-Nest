@@ -24,7 +24,6 @@ export class AuthGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException();
     }
-
     try {
       const payload = await this.jwtService.verifyAsync(
         token,
@@ -33,10 +32,16 @@ export class AuthGuard implements CanActivate {
         }
       );
       if (!payload.role || payload.role ==='' || !roles.includes(payload.role)) throw new UnauthorizedException();
-
+      
       request['user'] = payload;
-    } catch {
-      throw new UnauthorizedException();
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Session expired. Please login again');
+      }
+      if (error.name === 'JsonWebTokenError') {
+        throw new UnauthorizedException('Invalid token');
+      }
+      throw new UnauthorizedException('Authentication failed');
     }
     return true;
   }

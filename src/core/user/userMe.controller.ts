@@ -8,8 +8,6 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { AuthGuard } from "src/common/guard/Auth.guard";
 import { Request } from "express";
 import { ForgetPasswordDto } from "./dto/forget-password.dto";
-
-
 //User Me
 @UseGuards(AuthGuard)
 @Controller({ path: 'userMe', version: '1' })

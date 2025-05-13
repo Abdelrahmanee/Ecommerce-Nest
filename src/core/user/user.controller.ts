@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Put, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -6,13 +6,12 @@ import { Roles } from 'src/common/decoretors/roles.decoretor';
 import { UserRoles } from 'src/common/constants/user.roles';
 import { ApiResponse } from 'src/common/dto/api-response.dto';
 import { ApiOperation } from '@nestjs/swagger';
+import { AuthGuard } from 'src/common/guard/Auth.guard';
 
+@UseGuards(AuthGuard)
 @Controller({ path: 'user', version: '1' })
 export class UserController {
   constructor(private readonly userService: UserService) { }
-
-
-
 
   //Admin
   @Post()
@@ -27,11 +26,17 @@ export class UserController {
   @Roles([UserRoles.ADMIN])
   @ApiOperation({ summary: 'Get all users with pagination' })
   async findAll(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10
+    @Query('page') page?: string,
+    @Query('limit') limit?: string
   ) {
-    const { data, total } = await this.userService.findAll({ page, limit });
-    return ApiResponse.paginate(data, page, limit, total)
+    const pageNumber = (!page || isNaN(+page)) ? 1 : +page;
+    const limitNumber = (!limit || isNaN(+limit)) ? 10 : +limit;
+
+    const { data, total } = await this.userService.findAll({ 
+      page: pageNumber, 
+      limit: limitNumber 
+    });
+    return ApiResponse.paginate(data, pageNumber, limitNumber, total);
   }
 
 

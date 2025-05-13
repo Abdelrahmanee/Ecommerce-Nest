@@ -1,30 +1,31 @@
 import {
+    IsBoolean,
     IsEmail,
+    IsNotEmpty,
+    IsOptional,
     IsString,
     MaxLength,
     MinLength,
 } from 'class-validator';
-import { i18nValidationMessage } from 'nestjs-i18n';
 
 export class SignUpDto {
     // Name
-    // @IsString({ message: i18nValidationMessage('dto.IS_STRING') })
-    // @MinLength(3, { message: i18nValidationMessage('dto.MinLength') })
-    // @MaxLength(30, { message: i18nValidationMessage('dto.MaxLength') })
     @IsString({ message: 'Name must be a string' })
-    @MinLength(0, { message: 'The Name Must be Required' })
-    @MaxLength(200, { message: 'Name must be at most 200 characters' })
+    @IsNotEmpty({ message: 'Name is required' }) // Better than @MinLength(0)
+    @MinLength(3, { message: 'Name must be at least 3 characters' })
+    @MaxLength(30, { message: 'Name must be at most 30 characters' })
     name: string;
+
     // Email
-    @IsString({ message: 'Email must be a string' })
-    @MinLength(0, { message: 'The Email Must be Required' })
     @IsEmail({}, { message: 'Email is not valid' })
+    @IsNotEmpty({ message: 'Email is required' })
     email: string;
+
     // Password
     @IsString({ message: 'Password must be a string' })
-    @MinLength(3, { message: 'password must be at least 3 characters' })
-    @MaxLength(20, { message: 'password must be at most 20 characters' })
+    @IsNotEmpty({ message: 'Password is required' })
+    @MinLength(8, { message: 'Password must be at least 8 characters' }) // Recommended for security
+    @MaxLength(20, { message: 'Password must be at most 20 characters' })
     password: string;
-
-
+    
 }

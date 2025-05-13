@@ -87,6 +87,7 @@ export class UserService {
   async unActiveAccount(payload: UserPayload) {
     const { _id: id } = payload;
     const isExist = await this.userRepository.findById(id)
+    console.log(isExist.active)
     if (!isExist) throw new HttpException("User Not Found", HttpStatus.NOT_FOUND)
     if (!isExist.active) throw new HttpException("Account Is Already In-Active", HttpStatus.BAD_REQUEST)
     const options = {
@@ -100,23 +101,30 @@ export class UserService {
   async forgetPassword(payload: UserPayload, forgetPasswordDto: ForgetPasswordDto) {
     const { _id: id } = payload;
     const { oldPassword, newPassword } = forgetPasswordDto;
-    const user = await this.userRepository.findById(id)
-    if (!user) throw new NotFoundException("User Not Found")
-    const isMatch: boolean = await bcrypt.compare(oldPassword, user.password)
+
+    // 1. Find the user
+    const user = await this.userRepository.findById(id);
+    if (!user) throw new NotFoundException("User Not Found");
+
+    const isMatch: boolean = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch) throw new BadRequestException("Incorrect old password");
+
+    const isSamePassword: boolean = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+        throw new BadRequestException("New password cannot be the same as the old password");
+    }
 
     const saltRounds = parseInt(process.env.ROUNDS, 10) || 10;
     const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-    const userAfterUpdate = await this.userRepository.updateById(id , {password :hashedPassword })
+    const userAfterUpdate = await this.userRepository.updateById(id, { password: hashedPassword });
 
     const access_token = this.jwtService.sign({
-      _id: userAfterUpdate._id,
-      name: userAfterUpdate.name,
-      email: userAfterUpdate.email,
-      role: userAfterUpdate.role,
-
+        _id: userAfterUpdate._id,
+        name: userAfterUpdate.name,
+        email: userAfterUpdate.email,
+        role: userAfterUpdate.role,
     });
 
     return { message: "Password updated successfully", access_token };
-  }
+}
 }
