@@ -74,6 +74,9 @@ export class UserService {
     if (!isExist) throw new HttpException("User Not Found", HttpStatus.NOT_FOUND)
     return this.userRepository.findById(id, { __v: 0, password: 0 });
   }
+  async getMyInfoById(id: string) {
+    return this.userRepository.findById(id ,{} , {lean : false});
+  }
   async updateMyInfo(payload: UserPayload, updateUserDto: UpdateUserDto) {
     const { _id: id } = payload;
     const isExist = this.userRepository.exists({ _id: id })

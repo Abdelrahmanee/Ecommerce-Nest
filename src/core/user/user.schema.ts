@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { UserRoles } from 'src/common/constants/user.roles';
+import { ShippingAddress } from 'src/common/interfaces/shipping-address.interface';
 
 export type UserDocument = HydratedDocument<User>;
 
@@ -46,9 +47,24 @@ export class User {
   })
   phoneNumber: string;
   @Prop({
-    type: String,
+    type: [{
+      firstName: String,
+      lastName: String,
+      address1: String,
+      address2: String,
+      city: String,
+      state: String,
+      country: String,
+      phoneNumber: String,
+      isDefault: {
+        type: Boolean,
+        default: false
+      }
+    }],
+    _id:true,
+    default: [],
   })
-  address: string;
+  shippingAddress: ShippingAddress[] ;
   @Prop({
     type: Boolean,
     enum: [false, true],

@@ -66,8 +66,9 @@ export class CartService {
     const product = await this.productRepository.findById(productId);
 
     if (!product) {
-      throw new NotFoundException(`Product with ID ${productId} not found`);
+      throw new  NotFoundException(`Product with ID ${productId} not found`);
     }
+    console.log("first")
 
     const itemIndex = cart.cartItems.findIndex(
       item => item.productId.toString() === productId && item?.color === color && item?.size === size

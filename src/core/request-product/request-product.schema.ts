@@ -23,7 +23,7 @@ export class RequestProduct {
         min: [1, 'Qauntity must be at least 1 product'],
         required: true,
     })
-    qauntity: number;
+    quantity: number;
     @Prop({
         type: String,
     })

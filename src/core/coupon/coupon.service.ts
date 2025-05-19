@@ -17,8 +17,8 @@ export class CouponService {
 
     async findByCode(code: CouponCodeDto): Promise<Coupon> {
         console.log(code)
-        const coupon = await this.couponRepository.findOne({ code })
-        if (!coupon) throw new NotFoundException(`Coupon with code ${code} not found`);
+        const coupon = await this.couponRepository.findOne({ code : code.code })
+        if (!coupon) throw new NotFoundException(`Coupon with code ${code.code} not found`);
         return coupon
     }
     /* Mark a coupon as used (increment usage count) */
@@ -153,8 +153,10 @@ export class CouponService {
     /* Validate if a coupon can be applied for a specific user and cart */
 
     async validateCoupon(code: CouponCodeDto, userId: string): Promise<Coupon> {
+        console.log(code)
+        console.log(code.code)
         const coupon = await this.findByCode(code);
-
+        console.log(coupon)
         if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date())
             throw new BadRequestException('This coupon has expired');
 
@@ -171,16 +173,20 @@ export class CouponService {
             }
         }
         if (coupon.minimumPurchase) {
+            console.log(coupon.minimumPurchase)
+            console.log("first")
             const cart = await this.cartRepository.findOne({ user: new Types.ObjectId(userId), status: 'active' });
             if (!cart) throw new NotFoundException('Cart not found');
+            console.log(cart.totalPrice < coupon.minimumPurchase)
             if (cart.totalPrice < coupon.minimumPurchase) {
                 throw new BadRequestException(
                     `This coupon requires a minimum purchase of ${coupon.minimumPurchase}`
                 );
             }
+            console.log("end")
         }
         // Check if coupon is restricted to specific users
-        if (coupon.restrictedToUsers && coupon.restrictedToUsers.length > 0) {
+        if (coupon?.restrictedToUsers && coupon.restrictedToUsers.length > 0) {
             const isAllowed = coupon.restrictedToUsers.some(
                 id => id.toString() === userId
             );
@@ -244,14 +250,19 @@ export class CouponService {
 
         }
 
+        return coupon;
     }
+
+
+
+
     async getUserCart(userId: string) {
         const cart = await this.cartRepository.findOne({ user: new Types.ObjectId(userId), status: 'active' })
         if (!cart) throw new NotFoundException("Cart Not Found")
         return cart
     }
 
-    
+
     // async getCouponUsageStatistics() {
     //     const [totalCoupons, activeCoupons, expiredCoupons, usedCoupons] = await Promise.all([
     //         this.couponRepository.countDocuments({}),
@@ -487,7 +498,7 @@ export class CouponService {
                         averageDiscountPerUse: parseFloat(stat.averageDiscount.toFixed(2)),
                         firstUsed: stat.firstUsed,
                         lastUsed: stat.lastUsed,
-                        utilizationRate: coupon.usageLimit 
+                        utilizationRate: coupon.usageLimit
                             ? `${((stat.totalUsage / coupon.usageLimit) * 100).toFixed(2)}%`
                             : 'No limit set'
                     }
@@ -506,10 +517,10 @@ export class CouponService {
                 to: queryEndDate
             },
             totalCouponsUsed: validCoupons.length,
-            totalDiscountGiven: validCoupons.reduce((sum, coupon) => 
+            totalDiscountGiven: validCoupons.reduce((sum, coupon) =>
                 sum + coupon.usageStats.totalDiscountGiven, 0
             ),
-            averageDiscountPerCoupon: validCoupons.reduce((sum, coupon) => 
+            averageDiscountPerCoupon: validCoupons.reduce((sum, coupon) =>
                 sum + coupon.usageStats.averageDiscountPerUse, 0
             ) / validCoupons.length || 0,
             couponsDetails: validCoupons

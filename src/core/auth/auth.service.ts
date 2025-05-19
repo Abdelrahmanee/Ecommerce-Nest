@@ -21,6 +21,7 @@ export class AuthService {
         console.log(signUpDto)
         const user = await this.userRepository.create({
             ...signUpDto,
+            shippingAddress:[],
             password: hashedPassword,
         });
         const userObject = user.toObject();

@@ -23,8 +23,9 @@ export class CartController {
   @Roles([UserRoles.USER])
   async getCart(@Req() request: Request) {
     const userId = request.user._id
-    const cart = this.cartService.getOrCreateCart(userId);
-    ApiResponse.success(cart, "Available Coupons");
+    const cart = await this.cartService.getOrCreateCart(userId);
+    console.log(cart)
+    return ApiResponse.success(cart, "Available Cart");
   }
   @Post("add-item")
   @ApiOperation({ summary: 'Create Coupon' })
@@ -32,8 +33,8 @@ export class CartController {
   @Roles([UserRoles.USER])
   async addItem(@Req() request: Request , @Body() item: AddItemDto) {
     const userId = request.user._id
-    const cart = this.cartService.addItem(userId , item);
-    ApiResponse.success(cart, "Item Added Successfully");
+    const cart = await this.cartService.addItem(userId , item);
+    return ApiResponse.success(cart, "Item Added Successfully");
   }
   // ______________________________________________________
   @Patch("update-item-quantity")
@@ -43,7 +44,7 @@ export class CartController {
   async updateItemQuantity(@Req() request: Request , @Body() item: UpdateItemQuantityDto) {
     const userId = request.user._id
     const cart = this.cartService.updateItemQuantity(userId, item ,  item.color ,item.size );
-    ApiResponse.success(cart, "Item Added Successfully");
+    return ApiResponse.success(cart, "Item Added Successfully");
   }
   // ______________________________________________________
   @Delete("remove-item")
@@ -53,7 +54,7 @@ export class CartController {
   async removeItem(@Req() request: Request , @Body() item: RemoveItemDto) {
     const userId = request.user._id
     const cart = await this.cartService.removeItem(userId, item.productId ,  item.color ,item.size );
-    ApiResponse.success(cart, "Item Removed Successfully");
+    return ApiResponse.success(cart, "Item Removed Successfully");
   }
   // ______________________________________________________
   @Delete("clear")
@@ -62,8 +63,8 @@ export class CartController {
   @Roles([UserRoles.USER])
   async clearCart(@Req() request: Request) {
     const userId = request.user._id
-    const cart = this.cartService.clearCart(userId );
-    ApiResponse.success(cart, "Cart is Cleared");
+    const cart =await this.cartService.clearCart(userId );
+    return ApiResponse.success(cart, "Cart is Cleared");
   }
 
 }

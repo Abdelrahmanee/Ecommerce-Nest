@@ -13,7 +13,7 @@ import { Request } from 'express';
 
 
 @ApiTags('Coupons')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard) 
 @Controller({ path: 'coupons', version: '1' })
 export class CouponController {
   constructor(private readonly couponService: CouponService) { }
@@ -26,6 +26,33 @@ export class CouponController {
     const coupon = await this.couponService.createCoupon(createCouponDto);
     return ApiResponse.success(coupon, "Coupon created successfully");
   }
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Validate Coupon Code' })
+  @Post('validate-coupon')
+  @Roles([UserRoles.USER])
+  @ApiBody({ type: CouponCodeDto })
+  async validateCoupon(@Body() applyCouponDto: CouponCodeDto, @Req() req: Request) {
+    console.log("couppon")
+    
+    try {
+      const userId = req.user._id;
+      console.log(userId)
+      console.log(applyCouponDto)
+      const coupon = await this.couponService.validateCoupon(applyCouponDto, userId);
+
+      const cart = await this.couponService.getUserCart(userId);
+      const discountAmount = this.couponService.calculateDiscountAmount(coupon, cart.totalPrice);
+
+      return ApiResponse.success({
+        coupon,
+        discountAmount,
+        newTotal: cart.totalPrice - discountAmount
+      }, "Valid coupon");
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Invalid coupon');
+    }
+  }
+
 
   @ApiOperation({ summary: 'Get All Paginated Coupons' })
   @Get()
@@ -55,7 +82,7 @@ export class CouponController {
     @Query('limit') limit: number = 10
   ) {
     const { data, total } = await this.couponService.getCouponsByStatus(isActive, { page, limit });
-    const message = isActive  ? "Active Coupons" : "InActive Coupons";
+    const message = isActive ? "Active Coupons" : "InActive Coupons";
     return ApiResponse.paginate(data, page || 1, limit || 10, total, message);
   }
 
@@ -144,7 +171,8 @@ export class CouponController {
       throw new BadRequestException('Error processing date range');
     }
   }
-  
+
+
   @ApiOperation({ summary: 'Get Usage Statistics For All Coupons' })
   @Get('stats/weekly/usage/:couponId')
   @ApiBearerAuth()
@@ -191,28 +219,7 @@ export class CouponController {
     return ApiResponse.success({}, "Coupon deleted successfully");
   }
 
-  @ApiOperation({ summary: 'Validate Coupon Code' })
-  @Post('validate')
-  @ApiBearerAuth()
 
-  async validateCoupon(@Body() applyCouponDto: CouponCodeDto, @Req() req) {
-    try {
-      const userId = req.user.id;
-      const coupon = await this.couponService.validateCoupon(applyCouponDto, userId);
-
-      // Get cart to calculate potential discount
-      const cart = await this.couponService.getUserCart(userId);
-      const discountAmount = this.couponService.calculateDiscountAmount(coupon, cart.totalPrice);
-
-      return ApiResponse.success({
-        coupon,
-        discountAmount,
-        newTotal: cart.totalPrice - discountAmount
-      }, "Valid coupon");
-    } catch (error) {
-      throw new BadRequestException(error.message || 'Invalid coupon');
-    }
-  }
 
 
 

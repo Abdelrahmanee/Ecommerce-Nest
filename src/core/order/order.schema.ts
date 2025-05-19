@@ -10,20 +10,43 @@ export class Order {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     required: true,
+    ref: User.name,
   })
-  user: typeof User;
+  user: string;
+
   @Prop({
     type: String,
     required: false,
   })
   sessionId: string;
+
+  @Prop({
+    type: String,
+    required: false,
+    enum: ['pending', 'processing', 'shipping', 'delivered', 'canceled'],
+    default: 'pending',
+  })
+  orderStatus: string;
+
   @Prop({
     type: [
       {
         productId: {
           type: mongoose.Schema.Types.ObjectId,
-          require: true,
+          required: true,
           ref: Product.name,
+        },
+        productName: {
+          type: String,
+          required: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
+        priceAfterDiscount: {
+          type: Number,
+          required: false,
         },
         quantity: {
           type: Number,
@@ -36,17 +59,12 @@ export class Order {
       },
     ],
   })
-  cartItems: [
-    {
-      productId: {
-        _id: string;
-        price: number;
-        priceAfterDiscount: number;
-      };
-      quantity: number;
-      color: string;
-    },
-  ];
+  orderItems: Array<{productId: string ;productName: string;price: number;priceAfterDiscount?: number;quantity: number;color: string;}>;
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    required: false,
+  })
+  couponId: string;
 
   @Prop({
     type: Number,
@@ -54,18 +72,21 @@ export class Order {
     default: 0,
   })
   taxPrice: number;
+
   @Prop({
     type: Number,
     required: false,
     default: 0,
   })
   shippingPrice: number;
+
   @Prop({
     type: Number,
     required: true,
     default: 0,
   })
   totalOrderPrice: number;
+
   @Prop({
     type: String,
     required: false,
@@ -73,6 +94,7 @@ export class Order {
     enum: ['cash', 'card'],
   })
   paymentMethodType: string;
+
   @Prop({
     type: Boolean,
     required: false,
@@ -80,26 +102,78 @@ export class Order {
   })
   isPaid: boolean;
   @Prop({
+    type: Boolean,
+    required: false,
+    default: false,
+  })
+  isDefault: boolean;
+
+  @Prop({
     type: Date,
     required: false,
   })
   paidAt: Date;
+
   @Prop({
     type: Boolean,
     required: false,
     default: false,
   })
-  isDeliverd: boolean;
+  isDelivered: boolean;
+
   @Prop({
     type: Date,
     required: false,
   })
-  deliverdAt: Date;
+  deliveredAt: Date;
+
   @Prop({
-    type: String,
-    required: false,
+    type: {
+      firstName: {
+        type: String,
+        required: true,
+      },
+      lastName: {
+        type: String,
+        required: true,
+      },
+      address1: {
+        type: String,
+        required: true,
+      },
+      address2: {
+        type: String,
+        required: false,
+      },
+      city: {
+        type: String,
+        required: true,
+      },
+      state: {
+        type: String,
+        required: true,
+      },
+      country: {
+        type: String,
+        required: true,
+      },
+      phoneNumber: {
+        type: String,
+        required: true,
+      },
+    },
+    required: true,
   })
-  shippingAddress: string;
+  shippingAddress: {
+    firstName: string;
+    lastName: string;
+    address1: string;
+    address2?: string;
+    city: string;
+    state: string;
+    country: string;
+    phoneNumber: string;
+  };
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

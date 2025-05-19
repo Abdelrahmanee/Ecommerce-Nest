@@ -13,9 +13,9 @@ export class CreateRequestProductDto {
   @IsString({ message: 'details must be a string' })
   @MinLength(5, { message: 'Details must be at least 5 characters' })
   details: string;
-  @IsNumber({}, { message: 'qauntity must be a number' })
-  @Min(1, { message: 'Qauntity must be at least 1 product' })
-  qauntity: number;
+  @IsNumber({}, { message: 'quantity must be a number' })
+  @Min(1, { message: 'quantity must be at least 1 product' })
+  quantity: number;
   @IsOptional()
   @IsString({ message: 'category must be a string' })
   category: string;
