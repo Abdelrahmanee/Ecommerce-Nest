@@ -84,17 +84,16 @@ export class ProductService {
     return fullProduct;
   }
 
-  // async getAllProducts(options: { page: number; limit: number; includeInactive?: boolean; populate?: string[] }) {
-  //   const { page, limit, includeInactive = false, populate = [] } = options;
+  async getAllProducts(options: { page: number; limit: number; includeInactive?: boolean; populate?: string[] }) {
+    const { page, limit, includeInactive = false, populate = [] } = options;
 
-  //   const filter = includeInactive ? {} : { active: true };
+    const filter = includeInactive ? {} : { active: true };
 
-  //   return await this.productRepository.findAll(filter, {}, {
-  //     page,
-  //     limit,
-  //     populate
-  //   });
-  // }
+    return await this.productRepository.findAll(filter, {}, {
+      page,
+      limit,
+    });
+  }
 
   async getSpecificProduct(id: string, options: { populate?: string[] } = {}) {
     const { populate = [] } = options;

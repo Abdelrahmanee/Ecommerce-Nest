@@ -39,22 +39,25 @@ export class ProductController {
   @ApiQuery({ name: 'populate', required: false, type: [String], description: 'Fields to populate (e.g. categoryRef,brandRef)' })
   @Roles([UserRoles.ADMIN, UserRoles.USER])
   @Get('')
-  // async getAllProducts(
-  //   @Query('page') page: number = 1,
-  //   @Query('limit') limit: number = 10,
-  //   @Query('includeInactive') includeInactive: boolean = false,
-  //   @Query('populate') populate: string = '',
-  // ) {
-  //   const populateArray = populate ? populate.split(',') : [];
-  //   const { data, total } = await this.productService.getAllProducts({
-  //     page,
-  //     limit,
-  //     includeInactive,
-  //     populate: populateArray
-  //   });
+  async getAllProducts(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+    @Query('includeInactive') includeInactive: boolean = false,
+    @Query('populate') populate: string = '',
+  ) {
+    const currentPage = Math.max(1, parseInt(page) || 1);
+    const itemsPerPage = Math.max(1, parseInt(limit) || 10);
+    const populateArray = populate ? populate.split(',') : [];
 
-  //   return ApiResponse.paginate(data, page, limit, total, "All Products");
-  // }
+    const { data, total } = await this.productService.getAllProducts({
+      page: currentPage,
+      limit: itemsPerPage,
+      includeInactive,
+      populate: populateArray
+    });
+
+    return ApiResponse.paginate(data, currentPage, itemsPerPage, total, "All Products");
+  }
 
   @ApiOperation({ summary: 'Get Product Info' })
   @ApiParam({ name: 'id', description: 'Product ID' })

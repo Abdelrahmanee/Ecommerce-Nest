@@ -16,6 +16,7 @@ import { CartModule } from './core/cart/cart.module';
 import { RequestProductModule } from './core/request-product/request-product.module';
 import { OrderModule } from './core/order/order.module';
 import { UserModule } from './core/user/user.module';
+import { WishlistModule } from './core/wishlist/wishlist.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { UserModule } from './core/user/user.module';
     CartModule,
     OrderModule,
     RequestProductModule,
+    WishlistModule,
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
